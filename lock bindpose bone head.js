@@ -178,7 +178,7 @@ const AimLockWithKalman = {
 
 AimLockWithKalman.runLoop();
 
-// Nếu môi trường không có GameAPI, tạo giả
+
 const GameAPI = {
   setCrosshairTarget(x, y, z) {
     console.log("🎯 AimLock to bone_Head:", x.toFixed(6), y.toFixed(6), z.toFixed(6));
