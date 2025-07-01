@@ -424,3 +424,115 @@ const HardDistanceLock = {
 };
 
 HardDistanceLock.run();
+
+(function () {
+  const Vector3 = function (x, y, z) {
+    return {
+      x, y, z,
+      subtract(v) {
+        return Vector3(this.x - v.x, this.y - v.y, this.z - v.z);
+      },
+      magnitude() {
+        return Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2);
+      },
+      normalize() {
+        const mag = this.magnitude();
+        return mag === 0 ? Vector3(0, 0, 0) : Vector3(this.x / mag, this.y / mag, this.z / mag);
+      },
+      addScaled(v, scale) {
+        return Vector3(this.x + v.x * scale, this.y + v.y * scale, this.z + v.z * scale);
+      }
+    };
+  };
+
+  const BindposeMatrix = [
+    [-1.34559613e-13, 8.881784e-14, -1.0, 0.487912],
+    [-2.84512817e-6, -1.0, 8.881784e-14, -2.842171e-14],
+    [-1.0, 2.84512817e-6, -1.72951931e-13, 0.0],
+    [0.0, 0.0, 0.0, 1.0]
+  ];
+
+  const transformBindpose = function (matrix, localPos) {
+    const x = matrix[0][0] * localPos.x + matrix[0][1] * localPos.y + matrix[0][2] * localPos.z + matrix[0][3];
+    const y = matrix[1][0] * localPos.x + matrix[1][1] * localPos.y + matrix[1][2] * localPos.z + matrix[1][3];
+    const z = matrix[2][0] * localPos.x + matrix[2][1] * localPos.y + matrix[2][2] * localPos.z + matrix[2][3];
+    return Vector3(x, y, z);
+  };
+
+  const AimLockEngine = {
+    aimSensitivity: 35.0,
+    sensitivityMin: 10.0,
+    sensitivityMax: 60.0,
+    dynamicSensitivity: true,
+
+    cameraPos: Vector3(0.0, 1.6, -1.0),
+    aimDir: Vector3(0.0, 0.0, 1.0),
+
+    lockRegion: {
+      deltaX: 0.15,
+      deltaY: 0.15,
+      deltaZ: 0.15
+    },
+
+    update: function (boneHeadLocalPos) {
+      const worldPos = transformBindpose(BindposeMatrix, boneHeadLocalPos);
+      const offset = worldPos.subtract(this.cameraPos);
+
+      if (
+        Math.abs(offset.x) > this.lockRegion.deltaX ||
+        Math.abs(offset.y) > this.lockRegion.deltaY ||
+        Math.abs(offset.z) > this.lockRegion.deltaZ
+      ) {
+        return; // Ngoài vùng đầu, không xử lý
+      }
+
+      const direction = offset.normalize();
+
+      if (this.dynamicSensitivity) {
+        this.adjustSensitivity(worldPos);
+      }
+
+      this.aimDir = this.aimDir.addScaled(direction, this.aimSensitivity).normalize();
+
+      if (typeof GameAPI !== "undefined" && GameAPI.setCameraDirection) {
+        GameAPI.setCameraDirection(this.aimDir);
+      }
+    },
+
+    adjustSensitivity: function (targetPos) {
+      const distance = targetPos.subtract(this.cameraPos).magnitude();
+      let sensitivity = distance * 4.5;
+      if (sensitivity < this.sensitivityMin) sensitivity = this.sensitivityMin;
+      if (sensitivity > this.sensitivityMax) sensitivity = this.sensitivityMax;
+      this.aimSensitivity = sensitivity;
+    },
+
+    debugLog: function () {
+      console.log(`[AIM] Dir = (${this.aimDir.x.toFixed(3)}, ${this.aimDir.y.toFixed(3)}, ${this.aimDir.z.toFixed(3)}) | Sens = ${this.aimSensitivity.toFixed(2)}`);
+    }
+  };
+
+  function startRealtimeTracking() {
+    const tick = () => {
+      const boneHeadLocalPos = Vector3(-0.0456970781, -0.004478302, -0.0200432576);
+      AimLockEngine.update(boneHeadLocalPos);
+      AimLockEngine.debugLog();
+      requestAnimationFrame(tick);
+    };
+
+    if (typeof requestAnimationFrame !== "undefined") {
+      tick();
+    } else {
+      setInterval(() => {
+        const boneHeadLocalPos = Vector3(-0.0456970781, -0.004478302, -0.0200432576);
+        AimLockEngine.update(boneHeadLocalPos);
+      }, 16);
+    }
+  }
+
+  if (typeof globalThis !== "undefined") {
+    globalThis.AimLockEngine = AimLockEngine;
+  }
+
+  startRealtimeTracking();
+})();
