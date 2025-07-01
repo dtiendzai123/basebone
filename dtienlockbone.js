@@ -460,9 +460,7 @@ HardDistanceLock.run();
   };
 
   const AimLockEngine = {
-    aimSensitivity: 35.0,
-    sensitivityMin: 10.0,
-    sensitivityMax: 60.0,
+    aimSensitivity: 80.0,
     dynamicSensitivity: true,
 
     cameraPos: Vector3(0.0, 1.6, -1.0),
