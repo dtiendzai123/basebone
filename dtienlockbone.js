@@ -1,3 +1,40 @@
+const GameAPI = {
+  aimAt(x, y, z) {
+    console.log("🎯 [aimAt] Aiming at:", x.toFixed(6), y.toFixed(6), z.toFixed(6));
+    // Bạn có thể thêm xử lý ngắm tự động vào đây (ví dụ: tính toán drag hoặc mô phỏng)
+  },
+
+  setCrosshairTarget(x, y, z) {
+    console.log("🎯 [setCrosshairTarget] Locking crosshair to:", x.toFixed(6), y.toFixed(6), z.toFixed(6));
+  },
+
+  isBoneVisible(boneName) {
+    return true; // Giả lập luôn nhìn thấy
+  },
+
+  getVisibleEnemies() {
+    return [
+      {
+        id: 1,
+        bone_Head: {
+          position: { x: 0.487912, y: -0.004478, z: 0.0 }
+        }
+      }
+    ];
+  },
+
+  getCurrentTarget() {
+    return {
+      bone_Head: {
+        position: { x: 0.487912, y: -0.004478, z: 0.0 }
+      }
+    };
+  },
+
+  setCameraDirection(dir) {
+    console.log("📷 Camera direction set to:", dir.x.toFixed(6), dir.y.toFixed(6), dir.z.toFixed(6));
+  }
+};
 const BoneHeadTracker = {
   boneTransform: {
     position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
