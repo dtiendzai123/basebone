@@ -114,7 +114,11 @@ const BoneHeadTracker = {
 };
 
 BoneHeadTracker.runLoop();
-
+if (typeof GameAPI.aimAt !== "function") {
+  GameAPI.aimAt = function (x, y, z) {
+    console.log("🎯 [aimAt] Fallback Aiming at:", x.toFixed(6), y.toFixed(6), z.toFixed(6));
+  };
+}
 const AimLockWithKalman = {
   // Thông tin xương đầu hiện tại
   currentBone: {
