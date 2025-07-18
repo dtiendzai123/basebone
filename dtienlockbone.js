@@ -220,7 +220,7 @@ const AimLockWithKalman = {
 AimLockWithKalman.runLoop();
 
 
-const GameAPI2 = {
+const GameAPI_2 = {
   setCrosshairTarget(x, y, z) {
     console.log("🎯 AimLock to bone_Head:", x.toFixed(6), y.toFixed(6), z.toFixed(6));
   }
