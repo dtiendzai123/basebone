@@ -35,7 +35,10 @@ const GameAPI = {
     console.log("📷 Camera direction set to:", dir.x.toFixed(6), dir.y.toFixed(6), dir.z.toFixed(6));
   }
 };
-
+const GamePackages = {
+  GamePackage1: "com.dts.freefireth",
+  GamePackage2: "com.dts.freefiremax"
+};
 const BoneHeadTracker = {
   boneTransform: {
     position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
