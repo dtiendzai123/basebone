@@ -109,7 +109,7 @@ const BoneHeadTracker = {
   runLoop: function () {
     setInterval(() => {
       this.lockToBoneHead();
-    }, 16);
+    }, 8);
   }
 };
 
@@ -208,7 +208,7 @@ const AimLockWithKalman = {
       const headPos = this.getTargetHeadWorldPosition(GameAPI.getCurrentTarget());
       this.updateTarget(headPos);
       this.lockToTarget();
-    }, 16);
+    }, 8);
   }
 };
 
@@ -284,7 +284,7 @@ const DragHardLock = {
   runLockLoop: function () {
     setInterval(() => {
       this.dragLockFrame();
-    }, 16); // ~60 FPS
+    }, 8); // ~60 FPS
   }
 };
 
@@ -343,7 +343,7 @@ const StableDragLock = {
       if (typeof requestAnimationFrame !== "undefined") {
         requestAnimationFrame(loop);
       } else {
-        setTimeout(loop, 16);
+        setTimeout(loop, 8);
       }
     };
     loop();
@@ -387,7 +387,7 @@ const HardBindHeadLock = {
   run: function () {
     setInterval(() => {
       this.lockHeadInstant();
-    }, 16);
+    }, 8);
   }
 };
 
@@ -443,7 +443,7 @@ const HardDistanceLock = {
   run: function () {
     setInterval(() => {
       this.lockHeadFrame();
-    }, 16);
+    }, 8);
   }
 };
 
