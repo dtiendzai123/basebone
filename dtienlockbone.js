@@ -483,56 +483,79 @@ HardDistanceLock.run();
     return Vector3(x, y, z);
   };
 
-  const AimLockEngine = {
-    aimSensitivity: 80.0,
-    dynamicSensitivity: true,
+const AimLockEngine = {
+  aimSensitivity: 999.0,
+  dynamicSensitivity: true,
 
-    cameraPos: Vector3(0.0, 1.6, -1.0),
-    aimDir: Vector3(0.0, 0.0, 1.0),
+  cameraPos: Vector3(0.0, 1.6, -1.0),
+  aimDir: Vector3(0.0, 0.0, 1.0),
 
-    lockRegion: {
-      deltaX: 0.15,
-      deltaY: 0.15,
-      deltaZ: 0.15
-    },
+  lockRegion: {
+    deltaX: 0.15,
+    deltaY: 0.15,
+    deltaZ: 0.15
+  },
 
-    update: function (boneHeadLocalPos) {
-      const worldPos = transformBindpose(BindposeMatrix, boneHeadLocalPos);
-      const offset = worldPos.subtract(this.cameraPos);
+  update: function (boneHeadLocalPos) {
+    const worldPos = transformBindpose(BindposeMatrix, boneHeadLocalPos);
+    const offset = worldPos.subtract(this.cameraPos);
 
-      if (
-        Math.abs(offset.x) > this.lockRegion.deltaX ||
-        Math.abs(offset.y) > this.lockRegion.deltaY ||
-        Math.abs(offset.z) > this.lockRegion.deltaZ
-      ) {
-        return; // Ngoài vùng đầu, không xử lý
-      }
-
-      const direction = offset.normalize();
-
-      if (this.dynamicSensitivity) {
-        this.adjustSensitivity(worldPos);
-      }
-
-      this.aimDir = this.aimDir.addScaled(direction, this.aimSensitivity).normalize();
-
-      if (typeof GameAPI !== "undefined" && GameAPI.setCameraDirection) {
-        GameAPI.setCameraDirection(this.aimDir);
-      }
-    },
-
-    adjustSensitivity: function (targetPos) {
-      const distance = targetPos.subtract(this.cameraPos).magnitude();
-      let sensitivity = distance * 4.5;
-      if (sensitivity < this.sensitivityMin) sensitivity = this.sensitivityMin;
-      if (sensitivity > this.sensitivityMax) sensitivity = this.sensitivityMax;
-      this.aimSensitivity = sensitivity;
-    },
-
-    debugLog: function () {
-      console.log(`[AIM] Dir = (${this.aimDir.x.toFixed(3)}, ${this.aimDir.y.toFixed(3)}, ${this.aimDir.z.toFixed(3)}) | Sens = ${this.aimSensitivity.toFixed(2)}`);
+    if (
+      Math.abs(offset.x) > this.lockRegion.deltaX ||
+      Math.abs(offset.y) > this.lockRegion.deltaY ||
+      Math.abs(offset.z) > this.lockRegion.deltaZ
+    ) {
+      return; // Ngoài vùng đầu, không xử lý
     }
-  };
+
+    const direction = offset.normalize();
+
+    if (this.dynamicSensitivity) {
+      this.adjustSensitivity(worldPos); // tự động điều chỉnh nhạy
+    }
+
+    this.aimDir = this.aimDir.addScaled(direction, this.aimSensitivity).normalize();
+
+    if (typeof GameAPI !== "undefined" && GameAPI.setCameraDirection) {
+      GameAPI.setCameraDirection(this.aimDir);
+    }
+  },
+
+  // ✅ Auto-tune aim sensitivity theo khoảng cách và vận tốc enemy
+  adjustSensitivity: function (targetPos) {
+    const offset = targetPos.subtract(this.cameraPos);
+    const distance = offset.magnitude();
+
+    // Ước lượng vận tốc enemy (nếu có)
+    let velocity = 0;
+    if (typeof GameAPI.getCurrentTarget === "function") {
+      const current = GameAPI.getCurrentTarget();
+      if (current?.velocity) {
+        const v = current.velocity;
+        velocity = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+      }
+    }
+
+    // Tính hệ số sensitivity
+    const minDist = 0.01, maxDist = 9999.0;
+    const minSens = 0.5, maxSens = 9999.0;
+    const speedWeight = 1.0;
+
+    let distRatio = (distance - minDist) / (maxDist - minDist);
+    distRatio = Math.max(0, Math.min(1, distRatio));
+
+    let velocityRatio = Math.min(1.0, velocity / 10.0);
+
+    const ratio = (1 - distRatio) * 0.7 + velocityRatio * 0.3 * speedWeight;
+    const sensitivity = minSens + (maxSens - minSens) * ratio;
+
+    this.aimSensitivity = parseFloat(sensitivity.toFixed(4));
+  },
+
+  debugLog: function () {
+    console.log(`[AIM] Dir = (${this.aimDir.x.toFixed(3)}, ${this.aimDir.y.toFixed(3)}, ${this.aimDir.z.toFixed(3)}) | Sens = ${this.aimSensitivity.toFixed(2)}`);
+  }
+};
 
   function startRealtimeTracking() {
     const tick = () => {
