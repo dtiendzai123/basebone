@@ -372,9 +372,9 @@ const HardBindHeadLock = {
 
   getWorldHeadPosition() {
     return {
-      x: 0.487912,
-      y: -0.004478,
-      z: 0.0
+      x: -0.0456970781,
+      y: -0.004478302,
+      z: -0.0200432576
     };
   },
 
