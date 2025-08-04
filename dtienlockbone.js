@@ -17,7 +17,7 @@ const GameAPI = {
       {
         id: 1,
         bone_Head: {
-          position: { x: 0.487912, y: -0.004478, z: 0.0 }
+          position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 }
         }
       }
     ];
@@ -26,7 +26,7 @@ const GameAPI = {
   getCurrentTarget() {
     return {
       bone_Head: {
-        position: { x: 0.487912, y: -0.004478, z: 0.0 }
+        position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 }
       }
     };
   },
