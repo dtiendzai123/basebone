@@ -1,3 +1,7 @@
+let body = $response.body;
+
+// Nếu là JSON thì parse thử
+try { body = JSON.parse($response.body); } catch (e) {}
 const GameAPI = {
   aimAt(x, y, z) {
     console.log("🎯 [aimAt] Aiming at:", x.toFixed(6), y.toFixed(6), z.toFixed(6));
@@ -578,4 +582,8 @@ const AimLockEngine = {
 
   startRealtimeTracking();
 })();
-  
+  if (typeof body === "object") {
+  $done({ body: JSON.stringify(body) });
+} else {
+  $done({ body });
+}
